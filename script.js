@@ -52,11 +52,30 @@
 
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Illustrationen im Seitenkopf sofort zeichnen ---------- */
-  document.querySelectorAll('.hero-illu, .page-hero-illu').forEach(function (el) {
+  /* ---------- Illustrationen: zeichnen, sobald sie gut sichtbar sind ---------- */
+  // Jeder Strich bekommt eine Verzögerung (--dl), damit sich die Szene nacheinander aufbaut.
+  // Verlässt die Illustration den Bildschirm, wird sie zurückgesetzt und beim nächsten Mal neu gezeichnet.
+  var illus = document.querySelectorAll('.illu-anim, .hero-illu, .page-hero-illu');
+  illus.forEach(function (el) {
     el.classList.add('illu-anim');
-    requestAnimationFrame(function () { el.classList.add('in'); });
+    var parts = el.querySelectorAll('.illu .s, .illu [class*="f"]');
+    parts.forEach(function (part, i) {
+      part.style.setProperty('--dl', (i / parts.length * 3.5).toFixed(2) + 's');
+    });
   });
+  if (illus.length) {
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      illus.forEach(function (el) { el.classList.add('in'); });
+    } else {
+      var drawObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.intersectionRatio >= 0.45) { entry.target.classList.add('in'); }
+          else if (entry.intersectionRatio === 0) { entry.target.classList.remove('in'); }
+        });
+      }, { threshold: [0, 0.45] });
+      illus.forEach(function (el) { drawObs.observe(el); });
+    }
+  }
 
   /* ---------- Zähler (Hero-Kennzahl) ---------- */
   document.querySelectorAll('[data-count]').forEach(function (el) {
@@ -65,12 +84,17 @@
     var start = null;
     var step = function (t) {
       if (!start) { start = t; }
-      var p = Math.min((t - start) / 1400, 1);
+      var p = Math.min((t - start) / 2600, 1);
       el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
       if (p < 1) { requestAnimationFrame(step); }
     };
     el.textContent = '0';
-    requestAnimationFrame(step);
+    if ('IntersectionObserver' in window) {
+      var countObs = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { countObs.disconnect(); requestAnimationFrame(step); }
+      }, { threshold: 1 });
+      countObs.observe(el);
+    } else { requestAnimationFrame(step); }
   });
 
   /* ---------- Parallax & Zeitstrahl-Fortschritt ---------- */
@@ -110,9 +134,9 @@
             io.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      }, { threshold: 0.2, rootMargin: '0px 0px -12% 0px' });
       items.forEach(function (el, i) {
-        el.style.setProperty('--d', ((i % 4) * 0.08) + 's');
+        el.style.setProperty('--d', ((i % 4) * 0.15) + 's');
         io.observe(el);
       });
     }
