@@ -433,3 +433,7 @@ a.c-card:hover small { color: var(--grey-400); }
   .site-header, .mobile-bar, .hero-art, .site-footer .footer-top { display: none; }
   .dark { background: none; color: #000; }
 }
+
+/* ---------- Standort (lokal, ohne Kartendienst) ---------- */
+.map-box .addr { font-size: 1.05rem; color: var(--black); font-weight: 600; }
+.map-box .copy-status:empty { display: none; }

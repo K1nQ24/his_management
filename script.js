@@ -81,6 +81,18 @@
     });
   }
 
+  /* ---------- Adresse kopieren (Kontaktseite) ---------- */
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var status = btn.parentNode.querySelector('.copy-status');
+      var done = function (ok) { if (status) { status.textContent = ok ? 'Adresse kopiert.' : text; } };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      } else { done(false); }
+    });
+  });
+
   /* ---------- Formulare: Validierung, Honeypot, Versand ---------- */
   var PLACEHOLDER = /^\[PLATZHALTER/;
   var MAIL = 'kontakt@hisobjekt.de';
