@@ -50,6 +50,52 @@
     });
   }
 
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Illustrationen im Seitenkopf sofort zeichnen ---------- */
+  document.querySelectorAll('.hero-illu, .page-hero-illu').forEach(function (el) {
+    el.classList.add('illu-anim');
+    requestAnimationFrame(function () { el.classList.add('in'); });
+  });
+
+  /* ---------- Zähler (Hero-Kennzahl) ---------- */
+  document.querySelectorAll('[data-count]').forEach(function (el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    if (reduceMotion || !target) { return; }
+    var start = null;
+    var step = function (t) {
+      if (!start) { start = t; }
+      var p = Math.min((t - start) / 1400, 1);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) { requestAnimationFrame(step); }
+    };
+    el.textContent = '0';
+    requestAnimationFrame(step);
+  });
+
+  /* ---------- Parallax & Zeitstrahl-Fortschritt ---------- */
+  var parallax = document.querySelectorAll('[data-parallax]');
+  var timeline = document.querySelector('.timeline');
+  if (!reduceMotion && (parallax.length || timeline)) {
+    var ticking = false;
+    var update = function () {
+      var y = window.scrollY;
+      parallax.forEach(function (el) {
+        el.style.transform = 'translateY(' + (y * parseFloat(el.getAttribute('data-parallax'))) + 'px)';
+      });
+      if (timeline) {
+        var r = timeline.getBoundingClientRect();
+        var p = (window.innerHeight * 0.6 - r.top) / r.height;
+        timeline.style.setProperty('--progress', Math.max(0, Math.min(1, p)).toFixed(3));
+      }
+      ticking = false;
+    };
+    window.addEventListener('scroll', function () {
+      if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    update();
+  }
+
   /* ---------- Scroll-Reveal ---------- */
   var items = document.querySelectorAll('.reveal');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

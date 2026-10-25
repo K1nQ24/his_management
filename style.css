@@ -262,9 +262,9 @@ a.c-card:hover small { color: var(--grey-400); }
 }
 .toc p { font-size: .75rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--grey-500); margin-bottom: 1rem; }
 .toc ol { border-left: 1px solid var(--grey-200); }
-.toc a { display: flex; gap: .75rem; padding: .5rem 0 .5rem 1rem; margin-left: -1px; border-left: 2px solid transparent; text-decoration: none; font-size: .92rem; font-weight: 500; color: var(--grey-500); line-height: 1.35; transition: color .2s, border-color .2s; }
-.toc a span { font-size: .75rem; font-weight: 700; min-width: 1.4rem; padding-top: .1rem; }
-.toc a:hover { color: var(--black); }
+.toc a:not(.btn) { display: flex; gap: .75rem; padding: .5rem 0 .5rem 1rem; margin-left: -1px; border-left: 2px solid transparent; text-decoration: none; font-size: .92rem; font-weight: 500; color: var(--grey-500); line-height: 1.35; transition: color .2s, border-color .2s; }
+.toc a:not(.btn) span { font-size: .75rem; font-weight: 700; min-width: 1.4rem; padding-top: .1rem; }
+.toc a:not(.btn):hover { color: var(--black); }
 .toc a[aria-current="true"] { color: var(--black); border-color: var(--black); font-weight: 700; }
 .toc .btn { margin-top: 2rem; width: 100%; }
 .jump-mobile { display: flex; flex-wrap: wrap; gap: .5rem; }
@@ -272,7 +272,7 @@ a.c-card:hover small { color: var(--grey-400); }
 .jump-mobile a:hover { background: var(--black); color: var(--white); }
 
 .service { padding-block: clamp(3rem, 6vw, 4.5rem); border-top: 1px solid var(--grey-200); }
-.service:first-child { border-top: 0; padding-top: 0; }
+.service:first-child, .jump-mobile + .service { border-top: 0; padding-top: 0; }
 .service-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.5rem; }
 .service-no { font-size: clamp(3rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -.06em; line-height: .9; color: transparent; -webkit-text-stroke: 1.5px var(--black); }
 .service .icon { width: 48px; height: 48px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
@@ -437,3 +437,115 @@ a.c-card:hover small { color: var(--grey-400); }
 /* ---------- Standort (lokal, ohne Kartendienst) ---------- */
 .map-box .addr { font-size: 1.05rem; color: var(--black); font-weight: 600; }
 .map-box .copy-status:empty { display: none; }
+
+/* =====================================================================
+   Illustrationen & Dynamik
+   ===================================================================== */
+.illu { width: 100%; height: auto; display: block; color: var(--black); }
+.illu .s { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.illu .thin { stroke-width: 1.4; }
+.illu .f1 { fill: #E6E6E6; }
+.illu .f2 { fill: var(--white); }
+.illu .f3 { fill: var(--black); }
+.illu .tw { transform-box: fill-box; transform-origin: center; animation: twinkle 3.2s ease-in-out infinite; }
+.illu .tw:nth-of-type(2n) { animation-delay: 1.1s; }
+.illu .tw:nth-of-type(3n) { animation-delay: 2s; }
+@keyframes twinkle { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.55) rotate(45deg); opacity: .55; } }
+/* invertierte Darstellung auf dunklen Flächen */
+.dark .illu, .dark-panel .illu { color: var(--white); }
+.dark .illu .f1, .dark-panel .illu .f1 { fill: #262626; }
+.dark .illu .f2, .dark-panel .illu .f2 { fill: var(--black); }
+.dark .illu .f3, .dark-panel .illu .f3 { fill: var(--white); }
+
+/* Zeichen-Animation beim Einblenden */
+.js .illu-anim .illu .s { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js .illu-anim .illu .f1, .js .illu-anim .illu .f2, .js .illu-anim .illu .f3 { fill-opacity: 0; transition: fill-opacity .9s ease .9s; }
+.js .illu-anim.in .illu .s, .js .in .illu-anim .illu .s { animation: drawIn 1.8s var(--ease) forwards; }
+.js .illu-anim.in .illu .s.tw, .js .in .illu-anim .illu .s.tw { animation: drawIn 1.8s var(--ease) forwards, twinkle 3.2s ease-in-out 2s infinite; }
+.js .illu-anim.in .illu [class*="f"], .js .in .illu-anim .illu [class*="f"] { fill-opacity: 1; }
+@keyframes drawIn { to { stroke-dashoffset: 0; } }
+
+/* Bildflächen (Illustration jetzt, später Foto) */
+.illu-panel { position: relative; margin: 0; background: var(--grey-100); overflow: hidden; display: grid; place-items: center; padding: clamp(1rem, 3vw, 2rem);
+  background-image: radial-gradient(rgba(0,0,0,.07) 1px, transparent 1.2px); background-size: 18px 18px; }
+.illu-panel.dark-panel { background-color: var(--black); background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1.2px); }
+.illu-panel.tall { aspect-ratio: 1 / 1; }
+.illu-panel img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05); } /* echte Fotos passend zum S/W-Stil */
+
+/* Punktraster auf dunklen Flächen */
+.hero, .page-hero, .cta-box { background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1.2px); background-size: 22px 22px; }
+
+/* Hero mit Illustration */
+.hero-grid { display: grid; gap: 3rem; align-items: center; }
+@media (min-width: 1024px) { .hero-grid { grid-template-columns: 1.05fr 1fr; gap: 4rem; } }
+.hero-illu { max-width: 620px; width: 100%; justify-self: center; }
+.hero-illu .illu { filter: drop-shadow(0 30px 60px rgba(0,0,0,.35)); }
+.hero .hero-art { display: none; }
+@media (max-width: 1023px) { .hero-illu { max-width: 460px; } }
+
+/* Seitenkopf-Illustration */
+.page-hero-illu { position: absolute; right: max(var(--gutter), calc((100vw - var(--wrap)) / 2)); bottom: -6px; width: min(36vw, 440px); z-index: 0; opacity: .95; pointer-events: none; }
+@media (max-width: 1023px) { .page-hero-illu { display: none; } }
+.page-hero h1, .page-hero .lead { max-width: min(16ch, 56%); }
+.page-hero .lead { max-width: min(36rem, 52%); }
+@media (max-width: 1023px) { .page-hero h1 { max-width: 16ch; } .page-hero .lead { max-width: 38rem; } }
+
+/* Laufband */
+.marquee { overflow: hidden; border-bottom: 1px solid var(--grey-200); background: var(--white); padding-block: 1.15rem; }
+.marquee-track { display: flex; width: max-content; animation: marquee 60s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-track > span { display: flex; align-items: center; }
+.m-item { font-size: clamp(1.15rem, 2.2vw, 1.6rem); font-weight: 800; letter-spacing: -.02em; white-space: nowrap; padding-inline: 1.6rem; }
+.m-item:nth-of-type(even) { color: var(--grey-400); }
+.m-star { width: 18px; height: 18px; flex: none; }
+.m-star path { fill: var(--black); }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* Bento-Raster */
+.bento { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 700px) { .bento { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1050px) {
+  .bento { grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; }
+  .bento-card.big { grid-column: span 2; grid-row: span 2; }
+}
+.bento-card { display: flex; flex-direction: column; text-decoration: none; color: var(--black); background: var(--grey-100); transition: transform .4s var(--ease), box-shadow .4s var(--ease); overflow: hidden; }
+.bento-card .illu-panel { flex: 1; background-color: transparent; transition: transform .6s var(--ease); }
+.bento-card:hover { transform: translateY(-6px); box-shadow: 0 22px 50px rgba(0,0,0,.14); }
+.bento-card:hover .illu-panel { transform: scale(1.04); }
+.bento-cap { padding: 1.25rem 1.5rem 1.5rem; border-top: 1px solid var(--grey-200); background: var(--white); position: relative; z-index: 1; }
+.bento-cap h3 { margin-bottom: .3rem; font-size: 1.15rem; }
+.bento-card.big .bento-cap h3 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+.bento-cap p { margin: 0 0 .75rem; color: var(--grey-500); font-size: .95rem; }
+.bento-cap .more { display: inline-flex; align-items: center; gap: .4rem; font-size: .85rem; font-weight: 700; }
+.bento-cap .more svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; transition: transform .3s var(--ease); }
+.bento-card:hover .more svg { transform: translateX(5px); }
+.bento-card.dark { background: var(--black); color: var(--white); }
+.bento-card.dark .bento-cap { background: var(--black); border-color: var(--grey-800); }
+.bento-card.dark .bento-cap p { color: var(--grey-400); }
+.bento-card.dark .illu-panel { background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1.2px); }
+
+/* Leistungsseite mit Illustration */
+.service-top { display: grid; gap: 2rem; align-items: center; }
+@media (min-width: 760px) { .service-top { grid-template-columns: 1fr minmax(240px, .9fr); gap: 3rem; } }
+.service-top .illu-panel { aspect-ratio: 4 / 3; }
+.service:nth-child(odd of .service) .service-top .illu-panel { order: 0; }
+
+/* Icons: Strich zeichnet sich beim Hover neu */
+.tile:hover .icon path, .tile:hover .icon rect, .tile:hover .icon circle,
+.tile:focus-visible .icon path, .tile:focus-visible .icon rect, .tile:focus-visible .icon circle { stroke-dasharray: 1; animation: iconDraw .7s var(--ease) both; }
+@keyframes iconDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* Zeitstrahl: Linie füllt sich beim Scrollen */
+.timeline::after { content: ""; position: absolute; left: 1.6rem; top: .5rem; width: 1px; height: calc(var(--progress, 0) * (100% - 1rem)); background: var(--black); transition: height .15s linear; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  .js .illu-anim .illu .s { stroke-dasharray: none; stroke-dashoffset: 0; }
+  .js .illu-anim .illu [class*="f"] { fill-opacity: 1; }
+  .illu .tw { animation: none; }
+}
+/* Hover-Anhebung auch nach dem Scroll-Reveal */
+.js .tile.reveal.in:hover, .js .tile.reveal.in:focus-visible, .js .bento-card.reveal.in:hover { transform: translateY(-6px); transition-delay: 0s; }
+
+.page-hero:has(.page-hero-illu) .hero-art { display: none; }
+.page-hero-illu { bottom: 18px; }
