@@ -589,7 +589,7 @@ a.c-card:hover small { color: var(--grey-400); }
 /* Lesefokus: die Zeile in der Bildschirmmitte wird hervorgehoben (Klasse is-focus per JS) */
 .js .services-layout.spy .service > p { color: var(--grey-500); transition: color .4s var(--ease); }
 .js .services-layout.spy .service > p.is-focus { color: var(--black); }
-.js .services-layout.spy .checks li { color: var(--grey-500); transition: background .35s var(--ease), color .35s var(--ease), padding-left .35s var(--ease); }
+.js .services-layout.spy .checks li { color: var(--grey-500); box-shadow: inset 0 0 0 0 transparent; transition: box-shadow .35s var(--ease), color .35s var(--ease), padding-left .35s var(--ease); }
 .js .services-layout.spy .checks li::before { transition: left .35s var(--ease); }
-.js .services-layout.spy .checks li.is-focus { background: var(--black); color: var(--white); padding-left: 2.8rem; }
+.js .services-layout.spy .checks li.is-focus { color: var(--black); padding-left: 2.8rem; box-shadow: inset 0 0 0 1.5px var(--black); }
 .js .services-layout.spy .checks li.is-focus::before { left: 1rem; }
