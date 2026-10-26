@@ -23,6 +23,14 @@
     });
   }
 
+  /* ---------- Cookie-Einstellungen (Cookiebot) erneut öffnen ---------- */
+  document.querySelectorAll('[data-cookie-settings]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (window.Cookiebot && typeof window.Cookiebot.renew === 'function') { window.Cookiebot.renew(); }
+    });
+  });
+
   /* ---------- Header-Zustand beim Scrollen ---------- */
   var header = document.querySelector('.site-header');
   if (header) {

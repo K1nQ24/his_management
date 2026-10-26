@@ -16,7 +16,7 @@ ErrorDocument 404 /404.html
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 </IfModule>
 
-# Sicherheits-Header. Die Content-Security-Policy erlaubt nur Inhalte vom eigenen Server –
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://consent.cookiebot.com https://consentcdn.cookiebot.com https://consent.cookiebot.eu https://consentcdn.cookiebot.eu; connect-src 'self' https://consent.cookiebot.com https://consentcdn.cookiebot.com https://consent.cookiebot.eu https://consentcdn.cookiebot.eu; frame-src https://consentcdn.cookiebot.com https://consentcdn.cookiebot.eu; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://imgsct.cookiebot.com https://imgsct.cookiebot.eu; font-src 'self'; form-action 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
 # so kann auch versehentlich nichts von Drittanbietern (Google Fonts, Maps …) in den Browser geladen werden.
 # Hinweis Cloudflare: Ein vorgeschalteter Proxy/CDN liefert über die eigene Domain aus und ist davon nicht betroffen.
 # Cloudflare-Zusatzfunktionen, die Skripte von fremden Domains einfügen (z. B. Web Analytics), werden hier bewusst blockiert.
