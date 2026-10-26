@@ -256,7 +256,8 @@ a.c-card:hover small { color: var(--grey-400); }
 @media (max-width: 959px) { .split.aside-last > .sticky { order: 2; } }
 
 /* ---------- Leistungsseite ---------- */
-.services-layout { display: grid; gap: 2rem; }
+.services-layout { display: grid; gap: 2rem; grid-template-columns: minmax(0, 1fr); }
+.services-layout > * { min-width: 0; } /* sonst dehnt die Chip-Leiste die Spalte auf ihre volle Breite */
 @media (min-width: 1024px) { .services-layout { grid-template-columns: 260px minmax(0, 1fr); gap: 5rem; } }
 .toc { display: none; }
 @media (min-width: 1024px) {
@@ -270,9 +271,17 @@ a.c-card:hover small { color: var(--grey-400); }
 .toc a:not(.btn):hover { color: var(--black); }
 .toc a[aria-current="true"] { color: var(--black); border-color: var(--black); font-weight: 700; }
 .toc .btn { margin-top: 2rem; width: 100%; }
-.jump-mobile { display: flex; flex-wrap: wrap; gap: .5rem; }
-.jump-mobile a { text-decoration: none; border: 1.5px solid var(--black); padding: .45rem .85rem; font-weight: 600; font-size: .88rem; transition: background .2s, color .2s; }
-.jump-mobile a:hover { background: var(--black); color: var(--white); }
+/* Mobil: mitlaufende Leistungsleiste (Gegenstück zum Inhaltsverzeichnis auf dem Desktop) */
+.jump-mobile { position: sticky; top: var(--header-h); z-index: 50; margin: 0 calc(-1 * var(--gutter)) 2.5rem; background: var(--white); border-bottom: 1px solid var(--grey-200); }
+.jump-track { display: flex; gap: .5rem; overflow-x: auto; padding: .75rem var(--gutter); scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.jump-track::-webkit-scrollbar { display: none; }
+.jump-mobile a { flex: none; display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; scroll-snap-align: center; text-decoration: none; border: 1.5px solid var(--grey-300); padding: .5rem .9rem; font-weight: 600; font-size: .88rem; transition: background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease); }
+.jump-mobile a span { font-size: .72rem; font-weight: 800; color: var(--grey-500); transition: color .35s; }
+.jump-mobile a[aria-current="true"] { background: var(--black); color: var(--white); border-color: var(--black); }
+.jump-mobile a[aria-current="true"] span { color: var(--grey-300); }
+.jump-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
+.jump-progress span { display: block; height: 100%; background: var(--black); transform: scaleX(var(--p, 0)); transform-origin: left; }
+@media (max-width: 1023px) { .service { scroll-margin-top: calc(var(--header-h) + 72px); } }
 
 .service { padding-block: clamp(3rem, 6vw, 4.5rem); border-top: 1px solid var(--grey-200); }
 .service:first-child, .jump-mobile + .service { border-top: 0; padding-top: 0; }

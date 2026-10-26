@@ -31,23 +31,46 @@
     onScroll();
   }
 
-  /* ---------- Inhaltsverzeichnis: aktiven Abschnitt markieren ---------- */
-  var tocLinks = document.querySelectorAll('.toc a[href^="#"]');
+  /* ---------- Inhaltsverzeichnis (Desktop) und Leistungsleiste (Mobil): aktiven Abschnitt markieren ---------- */
+  var tocLinks = document.querySelectorAll('.toc a[href^="#"], .jump-mobile a[href^="#"]');
+  var jumpTrack = document.querySelector('.jump-track');
   if (tocLinks.length && 'IntersectionObserver' in window) {
     var byId = {};
-    tocLinks.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+    tocLinks.forEach(function (a) {
+      var id = a.getAttribute('href').slice(1);
+      (byId[id] = byId[id] || []).push(a);
+    });
     var spy = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) { return; }
         tocLinks.forEach(function (a) { a.removeAttribute('aria-current'); });
-        var link = byId[entry.target.id];
-        if (link) { link.setAttribute('aria-current', 'true'); }
+        (byId[entry.target.id] || []).forEach(function (link) {
+          link.setAttribute('aria-current', 'true');
+          // aktiven Eintrag in der mobilen Leiste mittig ins Bild holen (ohne die Seite zu verschieben)
+          if (jumpTrack && jumpTrack.contains(link) && jumpTrack.offsetParent) {
+            jumpTrack.scrollTo({ left: link.offsetLeft - (jumpTrack.clientWidth - link.offsetWidth) / 2, behavior: 'smooth' });
+          }
+        });
       });
     }, { rootMargin: '-35% 0px -60% 0px' });
     Object.keys(byId).forEach(function (id) {
       var sec = document.getElementById(id);
       if (sec) { spy.observe(sec); }
     });
+  }
+
+  /* ---------- Fortschrittsbalken der mobilen Leistungsleiste ---------- */
+  var jumpBar = document.querySelector('.jump-progress');
+  var servicesBox = document.querySelector('.services-layout');
+  if (jumpBar && servicesBox) {
+    var setProgress = function () {
+      var r = servicesBox.getBoundingClientRect();
+      var p = (window.innerHeight * 0.4 - r.top) / (r.height - window.innerHeight * 0.4);
+      jumpBar.style.setProperty('--p', Math.max(0, Math.min(1, p)).toFixed(3));
+    };
+    window.addEventListener('scroll', setProgress, { passive: true });
+    window.addEventListener('resize', setProgress);
+    setProgress();
   }
 
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
