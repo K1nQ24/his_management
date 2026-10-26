@@ -389,7 +389,7 @@ a.c-card:hover small { color: var(--grey-400); }
 .mobile-bar { display: none; }
 
 /* ---------- Scroll-Reveal ---------- */
-.js .reveal { opacity: 0; transform: translateY(36px); transition: opacity 1.3s var(--ease), transform 1.3s var(--ease); transition-delay: var(--d, 0s); }
+.js .reveal { opacity: 0; transform: translateY(36px); transition: opacity 1s var(--ease), transform 1s var(--ease); transition-delay: var(--d, 0s); }
 .js .reveal.in { opacity: 1; transform: none; }
 
 /* ---------- Responsive ---------- */
@@ -463,9 +463,9 @@ a.c-card:hover small { color: var(--grey-400); }
 /* Zeichen-Animation: startet erst, wenn die Illustration sichtbar ist; Striche nacheinander (--dl per JS) */
 .js .illu-anim .illu .s { stroke-dasharray: 1; stroke-dashoffset: 1; }
 .js .illu-anim .illu [class*="f"] { fill-opacity: 0; }
-.js .illu-anim.in .illu .s { animation: drawIn 2.4s var(--ease) var(--dl, 0s) forwards; }
-.js .illu-anim.in .illu .s.tw { animation: drawIn 2.4s var(--ease) var(--dl, 0s) forwards, twinkle 3.2s ease-in-out calc(var(--dl, 0s) + 2.4s) infinite; }
-.js .illu-anim.in .illu [class*="f"] { fill-opacity: 1; transition: fill-opacity 1.6s ease calc(var(--dl, 0s) + 1s); }
+.js .illu-anim.in .illu .s { animation: drawIn 1.5s var(--ease) var(--dl, 0s) forwards; }
+.js .illu-anim.in .illu .s.tw { animation: drawIn 1.5s var(--ease) var(--dl, 0s) forwards, twinkle 3.2s ease-in-out calc(var(--dl, 0s) + 1.5s) infinite; }
+.js .illu-anim.in .illu [class*="f"] { fill-opacity: 1; transition: fill-opacity 1s ease calc(var(--dl, 0s) + .6s); }
 @keyframes drawIn { to { stroke-dashoffset: 0; } }
 
 /* Bildflächen (Illustration jetzt, später Foto) */
@@ -535,7 +535,7 @@ a.c-card:hover small { color: var(--grey-400); }
 
 /* Icons: Strich zeichnet sich beim Hover neu */
 .tile:hover .icon path, .tile:hover .icon rect, .tile:hover .icon circle,
-.tile:focus-visible .icon path, .tile:focus-visible .icon rect, .tile:focus-visible .icon circle { stroke-dasharray: 1; animation: iconDraw 1.4s var(--ease) both; }
+.tile:focus-visible .icon path, .tile:focus-visible .icon rect, .tile:focus-visible .icon circle { stroke-dasharray: 1; animation: iconDraw 1s var(--ease) both; }
 @keyframes iconDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
 /* Zeitstrahl: Linie füllt sich beim Scrollen */

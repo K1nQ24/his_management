@@ -60,7 +60,7 @@
     el.classList.add('illu-anim');
     var parts = el.querySelectorAll('.illu .s, .illu [class*="f"]');
     parts.forEach(function (part, i) {
-      part.style.setProperty('--dl', (i / parts.length * 3.5).toFixed(2) + 's');
+      part.style.setProperty('--dl', (i / parts.length * 2).toFixed(2) + 's');
     });
   });
   if (illus.length) {
@@ -84,7 +84,7 @@
     var start = null;
     var step = function (t) {
       if (!start) { start = t; }
-      var p = Math.min((t - start) / 2600, 1);
+      var p = Math.min((t - start) / 1800, 1);
       el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
       if (p < 1) { requestAnimationFrame(step); }
     };
@@ -136,7 +136,7 @@
         });
       }, { threshold: 0.2, rootMargin: '0px 0px -12% 0px' });
       items.forEach(function (el, i) {
-        el.style.setProperty('--d', ((i % 4) * 0.15) + 's');
+        el.style.setProperty('--d', ((i % 4) * 0.12) + 's');
         io.observe(el);
       });
     }
