@@ -70,6 +70,23 @@
     });
     var spyBox = document.querySelector('.services-layout');
     if (spyBox) { spyBox.classList.add('spy'); }
+
+    // Lesefokus: hervorgehoben wird nur die Zeile, die gerade die Bildschirmmitte schneidet
+    var focusEls = Array.prototype.slice.call(document.querySelectorAll('.service > p, .service .checks li'));
+    var focusTick = false;
+    var updateFocus = function () {
+      var mid = window.innerHeight * 0.5;
+      focusEls.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        el.classList.toggle('is-focus', r.top <= mid && r.bottom > mid);
+      });
+      focusTick = false;
+    };
+    window.addEventListener('scroll', function () {
+      if (!focusTick) { requestAnimationFrame(updateFocus); focusTick = true; }
+    }, { passive: true });
+    window.addEventListener('resize', updateFocus);
+    updateFocus();
   }
 
   /* ---------- Fortschrittsbalken der mobilen Leistungsleiste ---------- */

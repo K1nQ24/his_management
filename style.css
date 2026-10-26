@@ -586,8 +586,10 @@ a.c-card:hover small { color: var(--grey-400); }
 .service .illu-panel { transition: transform .7s var(--ease), box-shadow .7s var(--ease); }
 .service.is-active .illu-panel { box-shadow: 0 20px 44px rgba(0,0,0,.12); }
 @media (min-width: 760px) { .service.is-active .illu-panel { transform: scale(1.02); } }
-/* übrige Leistungen dezent zurücknehmen (nur wenn die Erkennung per JS aktiv ist) */
-.js .services-layout.spy .service.reveal.in { transition: opacity .6s var(--ease), transform 1s var(--ease); }
-.js .services-layout.spy .service.reveal.in:not(.is-active) { opacity: .35; }
-.js .services-layout.spy .service.reveal.in:not(.is-active):hover,
-.js .services-layout.spy .service.reveal.in:not(.is-active):focus-within { opacity: 1; }
+/* Lesefokus: die Zeile in der Bildschirmmitte wird hervorgehoben (Klasse is-focus per JS) */
+.js .services-layout.spy .service > p { color: var(--grey-500); transition: color .4s var(--ease); }
+.js .services-layout.spy .service > p.is-focus { color: var(--black); }
+.js .services-layout.spy .checks li { color: var(--grey-500); transition: background .35s var(--ease), color .35s var(--ease), padding-left .35s var(--ease); }
+.js .services-layout.spy .checks li::before { transition: left .35s var(--ease); }
+.js .services-layout.spy .checks li.is-focus { background: var(--black); color: var(--white); padding-left: 2.8rem; }
+.js .services-layout.spy .checks li.is-focus::before { left: 1rem; }
