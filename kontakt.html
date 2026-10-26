@@ -78,7 +78,8 @@
       <p class="copy-status hint" role="status" aria-live="polite"></p>
     </div>
   </div>
-  <div class="panel reveal"><h2>Schreiben Sie uns</h2><p class="muted">Wir melden uns bei Ihnen.</p><form class="form" data-form data-subject="Kontaktanfrage über hisobjekt.de" action="[PLATZHALTER: Formular-Endpunkt]" method="post" novalidate>
+  <div class="panel reveal"><h2>Schreiben Sie uns</h2><p class="muted">Wir melden uns bei Ihnen.</p><form class="form" data-form data-subject="Kontaktanfrage über hisobjekt.de" action="formular.php" method="post" id="formular" novalidate>
+  <input type="hidden" name="formular" value="kontakt">
   <div class="form-row two">
     <div class="field" data-required="text"><label for="k-name">Name *</label><input type="text" id="k-name" name="name" autocomplete="name" required><p class="error-msg">Bitte geben Sie Ihren Namen an.</p></div>
     <div class="field" data-required="email"><label for="k-mail">E-Mail *</label><input type="email" id="k-mail" name="email" autocomplete="email" required><p class="error-msg">Bitte geben Sie eine gültige E-Mail-Adresse an.</p></div>

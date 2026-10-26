@@ -169,7 +169,7 @@
   var params = new URLSearchParams(window.location.search);
   var preset = (params.get('leistung') || '').split(',').map(function (s) { return s.trim(); });
   if (preset.length) {
-    document.querySelectorAll('input[name="leistung"]').forEach(function (box) {
+    document.querySelectorAll('input[name="leistung[]"]').forEach(function (box) {
       if (preset.indexOf(box.value) !== -1) { box.checked = true; }
     });
   }
@@ -227,10 +227,10 @@
       'E-Mail: ' + (d.get('email') || ''),
       'Objektort / PLZ: ' + (d.get('ort') || '')
     ];
-    var l = d.getAll('leistung');
+    var l = d.getAll('leistung[]');
     if (l.length) {
       var labels = l.map(function (v) {
-        var box = form.querySelector('input[name="leistung"][value="' + v + '"]');
+        var box = form.querySelector('input[name="leistung[]"][value="' + v + '"]');
         return box ? box.getAttribute('data-label') : v;
       });
       lines.push('Leistung(en): ' + labels.join(', '));
@@ -240,9 +240,20 @@
     return lines.join('\n');
   }
 
+  var STATUS_TEXT = {
+    ok: 'Vielen Dank! Ihre Nachricht ist bei uns eingegangen. Wir melden uns so bald wie möglich bei Ihnen.',
+    fehler: 'Ihre Nachricht konnte leider nicht gesendet werden. Bitte rufen Sie uns an (0176 72198299) oder schreiben Sie an ' + MAIL + '.'
+  };
+  var sentStatus = params.get('status');
+
   document.querySelectorAll('form[data-form]').forEach(function (form) {
     var status = form.querySelector('.form-status');
     var say = function (msg) { if (status) { status.textContent = msg; status.hidden = false; } };
+    // Rückmeldung nach dem Versand über formular.php (Weiterleitung mit ?status=ok|fehler)
+    if (STATUS_TEXT[sentStatus]) {
+      say(STATUS_TEXT[sentStatus]);
+      setTimeout(function () { status.scrollIntoView({ block: 'center' }); }, 300);
+    }
 
     form.addEventListener('input', function (e) {
       var field = e.target.closest('.field');
