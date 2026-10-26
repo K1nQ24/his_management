@@ -574,3 +574,20 @@ a.c-card:hover small { color: var(--grey-400); }
 .social-row .social { margin: 0; }
 .social-dark a { border-color: var(--grey-300); color: var(--black); }
 .social-dark a:hover, .social-dark a:focus-visible { background: var(--black); color: var(--white); border-color: var(--black); }
+
+/* ---------- Leistungen: aktuell betrachtete Leistung hervorheben ---------- */
+.service { position: relative; }
+.service::before { content: ""; position: absolute; left: calc(-1 * clamp(1rem, 2.5vw, 2rem)); top: clamp(3rem, 6vw, 4.5rem); bottom: clamp(3rem, 6vw, 4.5rem); width: 4px; background: var(--black); transform: scaleY(0); transform-origin: top; transition: transform .7s var(--ease); }
+.service.is-active::before { transform: scaleY(1); }
+.service:first-child::before, .jump-mobile + .service::before { top: 0; }
+@media (max-width: 1023px) { .service::before { left: calc(-1 * var(--gutter)); } }
+.service-no { transition: color .5s var(--ease); }
+.service.is-active .service-no { color: var(--black); }
+.service .illu-panel { transition: transform .7s var(--ease), box-shadow .7s var(--ease); }
+.service.is-active .illu-panel { box-shadow: 0 20px 44px rgba(0,0,0,.12); }
+@media (min-width: 760px) { .service.is-active .illu-panel { transform: scale(1.02); } }
+/* übrige Leistungen dezent zurücknehmen (nur wenn die Erkennung per JS aktiv ist) */
+.js .services-layout.spy .service.reveal.in { transition: opacity .6s var(--ease), transform 1s var(--ease); }
+.js .services-layout.spy .service.reveal.in:not(.is-active) { opacity: .35; }
+.js .services-layout.spy .service.reveal.in:not(.is-active):hover,
+.js .services-layout.spy .service.reveal.in:not(.is-active):focus-within { opacity: 1; }

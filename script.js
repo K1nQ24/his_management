@@ -52,6 +52,9 @@
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) { return; }
         tocLinks.forEach(function (a) { a.removeAttribute('aria-current'); });
+        // aktuell betrachtete Leistung optisch hervorheben
+        document.querySelectorAll('.service.is-active').forEach(function (sec) { sec.classList.remove('is-active'); });
+        entry.target.classList.add('is-active');
         (byId[entry.target.id] || []).forEach(function (link) {
           link.setAttribute('aria-current', 'true');
           // aktiven Eintrag in der mobilen Leiste mittig ins Bild holen (ohne die Seite zu verschieben)
@@ -65,6 +68,8 @@
       var sec = document.getElementById(id);
       if (sec) { spy.observe(sec); }
     });
+    var spyBox = document.querySelector('.services-layout');
+    if (spyBox) { spyBox.classList.add('spy'); }
   }
 
   /* ---------- Fortschrittsbalken der mobilen Leistungsleiste ---------- */
