@@ -561,3 +561,16 @@ a.c-card:hover small { color: var(--grey-400); }
 
 .page-hero:has(.page-hero-illu) .hero-art { display: none; }
 .page-hero-illu { bottom: 18px; }
+
+/* ---------- Social-Media-Links (dezent, nur Links – keine Plugins) ---------- */
+.social { display: flex; gap: .6rem; margin-top: 1.5rem; }
+.social a { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--grey-700); color: var(--grey-200); transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease); }
+.social a:hover, .social a:focus-visible { background: var(--white); color: var(--black); border-color: var(--white); transform: translateY(-2px); }
+.social svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.site-footer .social a:not(.btn) { color: var(--grey-200); }
+.site-footer .social a:not(.btn):hover { color: var(--black); text-decoration: none; }
+.social-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: 1.25rem; }
+.social-row > span { font-size: .75rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--grey-500); }
+.social-row .social { margin: 0; }
+.social-dark a { border-color: var(--grey-300); color: var(--black); }
+.social-dark a:hover, .social-dark a:focus-visible { background: var(--black); color: var(--white); border-color: var(--black); }
