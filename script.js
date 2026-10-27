@@ -272,8 +272,10 @@
 
   var STATUS_TEXT = {
     ok: 'Vielen Dank! Ihre Nachricht ist bei uns eingegangen. Wir melden uns so bald wie möglich bei Ihnen.',
-    fehler: 'Ihre Nachricht konnte leider nicht gesendet werden. Bitte rufen Sie uns an (0176 72198299) oder schreiben Sie an ' + MAIL + '.'
+    fehler: 'Ihre Nachricht konnte leider nicht gesendet werden. Bitte rufen Sie uns an (0176 72198299) oder schreiben Sie an ' + MAIL + '.',
+    limit: 'Es wurden gerade sehr viele Nachrichten gesendet. Bitte versuchen Sie es in einigen Minuten erneut oder rufen Sie uns an (0176 72198299).'
   };
+  var pageLoaded = Date.now();
   var sentStatus = params.get('status');
 
   document.querySelectorAll('form[data-form]').forEach(function (form) {
@@ -304,6 +306,15 @@
           '&body=' + encodeURIComponent(mailtoBody(form));
         say('Ihr E-Mail-Programm wird geöffnet. Bitte senden Sie die vorbereitete Nachricht dort ab. Alternativ erreichen Sie uns unter 0176 72198299.');
       } else {
+        // Ausfüllzeit mitsenden (Bots schicken Formulare in Sekundenbruchteilen ab)
+        var dauer = form.querySelector('input[name="dauer"]');
+        if (!dauer) {
+          dauer = document.createElement('input');
+          dauer.type = 'hidden';
+          dauer.name = 'dauer';
+          form.appendChild(dauer);
+        }
+        dauer.value = String(Math.round((Date.now() - pageLoaded) / 1000));
         form.submit();
       }
     });
