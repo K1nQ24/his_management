@@ -667,3 +667,13 @@ a.c-card:hover small { color: var(--grey-400); }
   .nav-extra .btn-outline { display: none; } /* E-Mail bleibt im Fußbereich und auf der Kontaktseite erreichbar */
   .nav-city .illu { max-width: 270px; }
 }
+
+/* ---------- Stuttgart-Silhouette am Ende jeder Seite ---------- */
+.footer-city { max-width: 640px; margin: 3.5rem auto 0; }
+.site-footer .footer-city + .footer-bottom { margin-top: 0; }
+.site-footer .illu { color: var(--white); }
+.site-footer .illu .f1 { fill: #262626; }
+.site-footer .illu .f2 { fill: var(--black); }
+.site-footer .illu .f3 { fill: var(--white); }
+/* Platz für den schwebenden Kontakt-Button, damit er die Links der letzten Zeile nicht verdeckt */
+.footer-bottom { padding-right: 84px; }
