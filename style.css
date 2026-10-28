@@ -639,3 +639,31 @@ a.c-card:hover small { color: var(--grey-400); }
 }
 @media (prefers-reduced-motion: reduce) { .fab-toggle::after { animation: none; } }
 @media print { .fab { display: none; } }
+
+/* ---------- Mobilmenü: Stuttgart-Silhouette am unteren Rand ---------- */
+.nav-city { display: none; }
+@media (max-width: 1023px) {
+  .nav.open { display: flex; flex-direction: column; }
+  .nav-list { padding-bottom: 1.5rem; }
+  .nav-city { display: block; margin-top: auto; padding: 1rem var(--gutter) calc(1.5rem + env(safe-area-inset-bottom)); text-align: center; }
+  .nav-city .illu { max-width: 420px; margin: 0 auto; }
+  .nav-city p { margin: .75rem 0 0; font-size: .78rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--grey-500); }
+  .nav-city strong { color: var(--black); }
+}
+@media (max-width: 1023px) {
+  .nav-city { padding-top: .5rem; }
+  .nav-city p { margin-top: .5rem; }
+}
+/* niedrige Bildschirme: Menü verdichten, damit die Silhouette ohne Scrollen sichtbar bleibt */
+@media (max-width: 1023px) and (max-height: 900px) {
+  .nav-list { padding-top: .25rem; padding-bottom: 1rem; }
+  .nav-list a { padding: .8rem 0; font-size: 1.4rem; }
+  .nav-extra { gap: .5rem; padding-bottom: 1rem; }
+  .nav-extra .btn { min-height: 46px; padding-block: .6rem; }
+  .nav-city .illu { max-width: 330px; }
+}
+@media (max-width: 1023px) and (max-height: 720px) {
+  .nav-list a { padding: .62rem 0; font-size: 1.25rem; }
+  .nav-extra .btn-outline { display: none; } /* E-Mail bleibt im Fußbereich und auf der Kontaktseite erreichbar */
+  .nav-city .illu { max-width: 270px; }
+}
