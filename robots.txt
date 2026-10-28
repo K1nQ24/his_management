@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /formular.php
 
 Sitemap: https://hisobjekt.de/sitemap.xml
