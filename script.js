@@ -130,7 +130,9 @@
     el.classList.add('illu-anim');
     var parts = el.querySelectorAll('.illu .s, .illu [class*="f"]');
     parts.forEach(function (part, i) {
-      part.style.setProperty('--dl', (i / parts.length * 2).toFixed(2) + 's');
+      // Stadtsilhouette im Mobilmenü: in unter 1 Sekunde fertig; übrige Illustrationen ruhiger
+      var spread = el.classList.contains('nav-city') ? 0.45 : 2;
+      part.style.setProperty('--dl', (i / parts.length * spread).toFixed(2) + 's');
     });
   });
   if (illus.length) {

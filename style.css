@@ -677,3 +677,9 @@ a.c-card:hover small { color: var(--grey-400); }
 .site-footer .illu .f3 { fill: var(--white); }
 /* Platz für den schwebenden Kontakt-Button, damit er die Links der letzten Zeile nicht verdeckt */
 .footer-bottom { padding-right: 84px; }
+/* Stadtsilhouette im Mobilmenü: Strich 0,5 s, Staffelung 0,45 s → nach knapp 1 Sekunde fertig */
+.js .nav-city.illu-anim.in .illu .s { animation-duration: .5s; }
+.js .nav-city.illu-anim.in .illu .s.tw { animation-duration: .5s, 3.2s; animation-delay: var(--dl, 0s), 1s; }
+.js .nav-city.illu-anim.in .illu [class*="f"] { transition: fill-opacity .3s ease calc(var(--dl, 0s) + .2s); }
+/* Silhouette im Footer: statisch, ohne Funkeln */
+.footer-city .illu .tw { animation: none; }
