@@ -472,9 +472,9 @@ a.c-card:hover small { color: var(--grey-400); }
 /* Zeichen-Animation: startet erst, wenn die Illustration sichtbar ist; Striche nacheinander (--dl per JS) */
 .js .illu-anim .illu .s { stroke-dasharray: 1; stroke-dashoffset: 1; }
 .js .illu-anim .illu [class*="f"] { fill-opacity: 0; }
-.js .illu-anim.in .illu .s { animation: drawIn 1.5s var(--ease) var(--dl, 0s) forwards; }
-.js .illu-anim.in .illu .s.tw { animation: drawIn 1.5s var(--ease) var(--dl, 0s) forwards, twinkle 3.2s ease-in-out calc(var(--dl, 0s) + 1.5s) infinite; }
-.js .illu-anim.in .illu [class*="f"] { fill-opacity: 1; transition: fill-opacity 1s ease calc(var(--dl, 0s) + .6s); }
+.js .illu-anim.in .illu .s { animation: drawIn 1s var(--ease) var(--dl, 0s) forwards; }
+.js .illu-anim.in .illu .s.tw { animation: drawIn 1s var(--ease) var(--dl, 0s) forwards, twinkle 3.2s ease-in-out calc(var(--dl, 0s) + 1s) infinite; }
+.js .illu-anim.in .illu [class*="f"] { fill-opacity: 1; transition: fill-opacity .6s ease calc(var(--dl, 0s) + .4s); }
 @keyframes drawIn { to { stroke-dashoffset: 0; } }
 
 /* Bildflächen (Illustration jetzt, später Foto) */

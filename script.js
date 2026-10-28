@@ -131,7 +131,7 @@
     var parts = el.querySelectorAll('.illu .s, .illu [class*="f"]');
     parts.forEach(function (part, i) {
       // Stadtsilhouette im Mobilmenü: in unter 1 Sekunde fertig; übrige Illustrationen ruhiger
-      var spread = el.classList.contains('nav-city') ? 0.45 : 2;
+      var spread = el.classList.contains('nav-city') ? 0.45 : 1;
       part.style.setProperty('--dl', (i / parts.length * spread).toFixed(2) + 's');
     });
   });
