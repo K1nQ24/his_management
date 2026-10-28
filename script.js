@@ -31,6 +31,23 @@
     });
   });
 
+  /* ---------- Schwebender Schnellkontakt ---------- */
+  var fab = document.querySelector('[data-fab]');
+  if (fab) {
+    var fabBtn = fab.querySelector('.fab-toggle');
+    var setFab = function (open) {
+      fab.classList.toggle('open', open);
+      fabBtn.setAttribute('aria-expanded', String(open));
+      fabBtn.setAttribute('aria-label', open ? 'Schnellkontakt schließen' : 'Schnellkontakt öffnen');
+    };
+    fabBtn.addEventListener('click', function () { setFab(!fab.classList.contains('open')); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && fab.classList.contains('open')) { setFab(false); fabBtn.focus(); }
+    });
+    document.addEventListener('click', function (e) { if (!fab.contains(e.target)) { setFab(false); } });
+    fab.querySelectorAll('.fab-list a').forEach(function (a) { a.addEventListener('click', function () { setFab(false); }); });
+  }
+
   /* ---------- Header-Zustand beim Scrollen ---------- */
   var header = document.querySelector('.site-header');
   if (header) {

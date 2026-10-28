@@ -349,8 +349,8 @@ a.c-card:hover small { color: var(--grey-400); }
 .mini-steps strong { display: block; }
 .mini-steps span { color: var(--grey-500); font-size: .93rem; }
 
-.map-box { margin-top: 2.5rem; min-height: 260px; display: grid; place-content: center; justify-items: center; text-align: center; gap: 1.1rem; padding: 2rem; color: var(--grey-600);
-  background: var(--grey-100) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M0 40 Q30 20 60 40 T120 40 M0 90 Q30 70 60 90 T120 90 M40 0 L50 120 M95 0 L85 120' fill='none' stroke='%23D9D9D9' stroke-width='1.5'/%3E%3C/svg%3E"); border: 1px solid var(--grey-200); }
+.map-box { margin-top: 2.5rem; min-height: 260px; display: grid; place-content: center; justify-items: center; text-align: center; gap: 1.1rem; padding: 2.5rem 2rem; color: var(--grey-600);
+  background-color: var(--grey-100); background-image: radial-gradient(rgba(0,0,0,.08) 1px, transparent 1.2px); background-size: 18px 18px; border: 1px solid var(--grey-200); }
 .map-box .icon { width: 36px; height: 36px; fill: none; stroke: var(--black); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .map-box p { margin: 0; max-width: 28rem; font-size: .92rem; }
 .map-box strong { color: var(--black); font-size: 1rem; }
@@ -604,3 +604,38 @@ a.c-card:hover small { color: var(--grey-400); }
 @keyframes lightRun { to { --light: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .js .services-layout.spy .checks li::after { animation: none; } }
 .js .services-layout.spy .checks li.is-focus::before { left: 1rem; }
+
+/* ---------- Schwebender Schnellkontakt (WhatsApp & Social Media) ---------- */
+.fab { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 95; display: flex; flex-direction: column; align-items: flex-end; gap: .75rem; pointer-events: none; }
+.fab > * { pointer-events: auto; }
+.fab-toggle { position: relative; width: 58px; height: 58px; border-radius: 50%; border: 0; background: var(--black); color: var(--white); cursor: pointer; display: grid; place-items: center;
+  /* weißer Ring + feine dunkle Außenkante: sichtbar auf schwarzen wie auf weißen Flächen */
+  box-shadow: 0 0 0 2px var(--white), 0 0 0 3px rgba(0,0,0,.18), 0 10px 28px rgba(0,0,0,.3); transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
+.fab-toggle:hover { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--white), 0 0 0 3px rgba(0,0,0,.18), 0 14px 34px rgba(0,0,0,.34); }
+.fab-toggle:focus-visible { outline: 3px solid var(--black); outline-offset: 4px; }
+.fab-toggle svg { position: absolute; width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: opacity .25s, transform .35s var(--ease); }
+.fab-close { opacity: 0; transform: rotate(-90deg) scale(.6); }
+.fab.open .fab-open { opacity: 0; transform: rotate(90deg) scale(.6); }
+.fab.open .fab-close { opacity: 1; transform: none; }
+/* ruhiger „Puls“, damit der Button wahrgenommen wird */
+.fab-toggle::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--grey-400); opacity: 0; animation: fabPulse 4s ease-out 2s infinite; }
+.fab.open .fab-toggle::after { animation: none; }
+@keyframes fabPulse { 0% { opacity: .5; transform: scale(1); } 40%, 100% { opacity: 0; transform: scale(1.55); } }
+
+.fab-list { display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; margin: 0; visibility: hidden; transition: visibility 0s linear .4s; }
+.fab.open .fab-list { visibility: visible; transition-delay: 0s; }
+.fab-list li { opacity: 0; transform: translateY(14px) scale(.9); transition: opacity .25s var(--ease), transform .3s var(--ease); transition-delay: calc((4 - var(--i)) * 30ms); }
+.fab.open .fab-list li { opacity: 1; transform: none; transition-delay: calc(var(--i) * 45ms); }
+.fab-list a { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--black); }
+.fab-label { background: var(--white); padding: .35rem .7rem; font-size: .85rem; font-weight: 700; box-shadow: 0 4px 16px rgba(0,0,0,.14); white-space: nowrap; }
+.fab-ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--white); border: 1.5px solid var(--black); box-shadow: 0 6px 18px rgba(0,0,0,.16); transition: background .2s, color .2s; }
+.fab-ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.fab-list a:hover .fab-ico, .fab-list a:focus-visible .fab-ico { background: var(--black); color: var(--white); }
+.fab-list a:focus-visible { outline: none; }
+.fab-list a:focus-visible .fab-label { outline: 2px solid var(--black); }
+@media (max-width: 1023px) {
+  .fab { bottom: calc(58px + 16px + env(safe-area-inset-bottom)); }
+  body.nav-open .fab { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .fab-toggle::after { animation: none; } }
+@media print { .fab { display: none; } }
