@@ -1,11 +1,13 @@
 <?php
 /**
  * HIS Objektmanagement – Versand von Anfrage- und Kontaktformular per E-Mail.
- * Läuft auf jedem Webhosting mit PHP mail() (ab PHP 7.4), z. B. Hetzner Webhosting. Speichert keine Formularinhalte auf dem Server.
+ * Versand über den Mailserver von IONOS (SMTP mit Anmeldung), sobald die Zugangsdatei his-mail-config.php
+ * vorhanden ist (Vorlage: his-mail-config.beispiel.php); sonst Fallback auf PHP mail(). Ab PHP 7.4.
+ * Speichert keine Formularinhalte auf dem Server.
  *
  * Absender und Empfänger ist kontakt@hisobjekt.de (Postfach bei IONOS); die Adresse des Besuchers steht
  * im Reply-To, damit „Antworten“ direkt an ihn geht.
- * Wichtig: Der SPF-Eintrag der Domain muss den Webserver als Absender erlauben, sonst landen Mails im Spam.
+ * Beim Fallback mail() muss der SPF-Eintrag der Domain den Webserver als Absender erlauben.
  *
  * Schutzmaßnahmen: Honeypot-Feld, Mindest-Ausfüllzeit, nur Absendungen von der eigenen Domain,
  * Begrenzung der Sendungen pro Absender und insgesamt, serverseitige Prüfung aller Felder.
@@ -108,6 +110,77 @@ function sendung_erlaubt(): bool
     return $erlaubt;
 }
 
+/**
+ * Zugangsdaten für den Versand über IONOS laden. Gesucht wird zuerst außerhalb des Web-Ordners,
+ * dann im Web-Ordner (dort zusätzlich per .htaccess gesperrt; die Datei gibt beim Aufruf nichts aus).
+ */
+function smtp_konfiguration(): ?array
+{
+    foreach ([dirname(__DIR__) . '/his-mail-config.php', __DIR__ . '/his-mail-config.php'] as $datei) {
+        if (@is_file($datei)) {
+            $c = include $datei;
+            if (is_array($c) && !empty($c['server']) && !empty($c['benutzer']) && !empty($c['passwort'])) {
+                return $c + ['port' => 587, 'sicherheit' => 'tls'];
+            }
+        }
+    }
+    return null;
+}
+
+/** Mail per SMTP mit Anmeldung (AUTH LOGIN) verschicken; STARTTLS (Port 587) oder SSL (Port 465). */
+function smtp_senden(array $c, string $von, string $an, string $nachricht): bool
+{
+    $ssl = $c['sicherheit'] === 'ssl';
+    $kontext = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'peer_name' => $c['server']]]);
+    $fp = @stream_socket_client(($ssl ? 'ssl://' : 'tcp://') . $c['server'] . ':' . (int) $c['port'], $nr, $fehler, 15, STREAM_CLIENT_CONNECT, $kontext);
+    if ($fp === false) {
+        error_log('HIS Formular SMTP: Verbindung fehlgeschlagen: ' . $fehler);
+        return false;
+    }
+    stream_set_timeout($fp, 15);
+    $schritt = function (string $befehl, array $erwartet) use ($fp): void {
+        if ($befehl !== '') {
+            fwrite($fp, $befehl . "\r\n");
+        }
+        $antwort = '';
+        while (($zeile = fgets($fp, 1024)) !== false) {
+            $antwort .= $zeile;
+            if (strlen($zeile) < 4 || $zeile[3] === ' ') {
+                break; // letzte Zeile einer (mehrzeiligen) Antwort
+            }
+        }
+        if (!in_array((int) substr($antwort, 0, 3), $erwartet, true)) {
+            throw new RuntimeException(trim($antwort) !== '' ? trim($antwort) : 'keine Antwort');
+        }
+    };
+    try {
+        $schritt('', [220]);
+        $schritt('EHLO hisobjekt.de', [250]);
+        if (!$ssl && $c['sicherheit'] === 'tls') {
+            $schritt('STARTTLS', [220]);
+            if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT)) {
+                throw new RuntimeException('TLS-Verschlüsselung fehlgeschlagen');
+            }
+            $schritt('EHLO hisobjekt.de', [250]);
+        }
+        $schritt('AUTH LOGIN', [334]);
+        $schritt(base64_encode($c['benutzer']), [334]);
+        $schritt(base64_encode($c['passwort']), [235]);
+        $schritt('MAIL FROM:<' . $von . '>', [250]);
+        $schritt('RCPT TO:<' . $an . '>', [250, 251]);
+        $schritt('DATA', [354]);
+        // Zeilen, die mit einem Punkt beginnen, verdoppeln (SMTP-Regel)
+        $schritt(preg_replace('/^\./m', '..', $nachricht) . "\r\n.", [250]);
+        $schritt('QUIT', [221]);
+    } catch (RuntimeException $e) {
+        error_log('HIS Formular SMTP: ' . $e->getMessage());
+        fclose($fp);
+        return false;
+    }
+    fclose($fp);
+    return true;
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     header('Location: index.html', true, 303);
     exit;
@@ -192,12 +265,21 @@ $kopfzeilen = implode("\r\n", [
     'Content-Transfer-Encoding: quoted-printable',
 ]);
 
-$gesendet = mail(
-    EMPFAENGER,
-    mb_encode_mimeheader(mb_substr($betreff, 0, 150), 'UTF-8', 'Q'),
-    quoted_printable_encode(str_replace("\n", "\r\n", implode("\n", $zeilen))),
-    $kopfzeilen,
-    '-f' . ABSENDER
-);
+$betreffKodiert = mb_encode_mimeheader(mb_substr($betreff, 0, 150), 'UTF-8', 'Q');
+$text = quoted_printable_encode(str_replace("\n", "\r\n", implode("\n", $zeilen)));
+$smtp = smtp_konfiguration();
+
+if ($smtp !== null) {
+    $nachricht = implode("\r\n", [
+        'Date: ' . date(DATE_RFC2822),
+        'Message-ID: <' . bin2hex(random_bytes(12)) . '@hisobjekt.de>',
+        'To: <' . EMPFAENGER . '>',
+        'Subject: ' . $betreffKodiert,
+        $kopfzeilen,
+    ]) . "\r\n\r\n" . $text;
+    $gesendet = smtp_senden($smtp, ABSENDER, EMPFAENGER, $nachricht);
+} else {
+    $gesendet = mail(EMPFAENGER, $betreffKodiert, $text, $kopfzeilen, '-f' . ABSENDER);
+}
 
 zurueck($seite, $gesendet ? 'ok' : 'fehler');

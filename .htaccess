@@ -19,6 +19,11 @@ ErrorDocument 404 /404.html
   RewriteRule ^ https://hisobjekt.de%{REQUEST_URI} [L,R=301]
 </IfModule>
 
+# Zugangsdaten für den Mailversand (und ihre Vorlage) nie ausliefern
+<FilesMatch "^his-mail-config">
+  Require all denied
+</FilesMatch>
+
 # Sicherheits-Header
 # Die Content-Security-Policy erlaubt nur Inhalte vom eigenen Server und von Cookiebot. So kann nichts von
 # anderen Drittanbietern (Google Fonts, Maps …) in den Browser geladen werden.
