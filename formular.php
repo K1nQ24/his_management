@@ -117,13 +117,17 @@ function sendung_erlaubt(): bool
 function smtp_konfiguration(): ?array
 {
     foreach ([dirname(__DIR__) . '/his-mail-config.php', __DIR__ . '/his-mail-config.php'] as $datei) {
-        if (@is_file($datei)) {
+        if (@is_file($datei) && @is_readable($datei)) {
             $c = include $datei;
             if (is_array($c) && !empty($c['server']) && !empty($c['benutzer']) && !empty($c['passwort'])) {
                 return $c + ['port' => 587, 'sicherheit' => 'tls'];
             }
+            error_log('HIS Formular: ' . $datei . ' gefunden, aber unvollständig (Server, Benutzer oder Passwort fehlt)');
         }
     }
+    // Nachvollziehbar machen, warum nicht über IONOS versendet wird (z. B. open_basedir verhindert Zugriff)
+    error_log('HIS Formular: keine lesbare his-mail-config.php gefunden – Versand per mail(). open_basedir: '
+        . (ini_get('open_basedir') ?: 'nicht gesetzt'));
     return null;
 }
 
@@ -278,6 +282,7 @@ if ($smtp !== null) {
         $kopfzeilen,
     ]) . "\r\n\r\n" . $text;
     $gesendet = smtp_senden($smtp, ABSENDER, EMPFAENGER, $nachricht);
+    error_log('HIS Formular: Versand über ' . $smtp['server'] . ($gesendet ? ' erfolgreich' : ' fehlgeschlagen'));
 } else {
     $gesendet = mail(EMPFAENGER, $betreffKodiert, $text, $kopfzeilen, '-f' . ABSENDER);
 }
