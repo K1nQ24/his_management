@@ -123,7 +123,7 @@ if (!eigene_herkunft()) {
 
 // Honeypot ausgefüllt oder in unter 3 Sekunden abgeschickt: Bot – still „erfolgreich“ beenden
 $dauer = feld('dauer', 10);
-if (feld('website') !== '' || ($dauer !== '' && ctype_digit($dauer) && (int) $dauer < MINDESTDAUER)) {
+if (feld('hp_x7') !== '' || ($dauer !== '' && ctype_digit($dauer) && (int) $dauer < MINDESTDAUER)) {
     zurueck($seite, 'ok');
 }
 
