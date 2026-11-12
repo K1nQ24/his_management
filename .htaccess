@@ -1,5 +1,5 @@
 # =====================================================================
-# HIS Objektmanagement – Einstellungen für das IONOS-Webhosting (Apache)
+# HIS Objektmanagement – Einstellungen für den Webserver (Apache, z. B. Hetzner Webhosting)
 # =====================================================================
 
 # Eigene Fehlerseite
@@ -13,7 +13,7 @@ ErrorDocument 404 /404.html
 
   # Immer HTTPS und immer https://hisobjekt.de (Ziel fest eingetragen, nicht aus der Anfrage übernommen)
   # Hinweis Cloudflare: SSL/TLS-Modus in Cloudflare auf „Full (strict)“ stellen.
-  # Im Modus „Flexible“ kommt die Anfrage per HTTP bei IONOS an und diese Regel erzeugt eine Weiterleitungsschleife.
+  # Im Modus „Flexible“ kommt die Anfrage per HTTP beim Webserver an und diese Regel erzeugt eine Weiterleitungsschleife.
   RewriteCond %{HTTPS} !=on [OR]
   RewriteCond %{HTTP_HOST} !^hisobjekt\.de$ [NC]
   RewriteRule ^ https://hisobjekt.de%{REQUEST_URI} [L,R=301]

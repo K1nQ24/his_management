@@ -1,11 +1,11 @@
 <?php
 /**
  * HIS Objektmanagement – Versand von Anfrage- und Kontaktformular per E-Mail.
- * Läuft auf dem IONOS-Webhosting (PHP mail(), ab PHP 7.4). Speichert keine Formularinhalte auf dem Server.
+ * Läuft auf jedem Webhosting mit PHP mail() (ab PHP 7.4), z. B. Hetzner Webhosting. Speichert keine Formularinhalte auf dem Server.
  *
- * Absender ist die eigens dafür angelegte Adresse formular@hisobjekt.de (IONOS verlangt eine Absenderadresse
- * der eigenen Domain, die als Postfach existiert); die Adresse des Besuchers steht im Reply-To,
- * damit „Antworten“ direkt an ihn geht. Empfänger ist das normale Postfach kontakt@hisobjekt.de.
+ * Absender und Empfänger ist kontakt@hisobjekt.de (Postfach bei IONOS); die Adresse des Besuchers steht
+ * im Reply-To, damit „Antworten“ direkt an ihn geht.
+ * Wichtig: Der SPF-Eintrag der Domain muss den Webserver als Absender erlauben, sonst landen Mails im Spam.
  *
  * Schutzmaßnahmen: Honeypot-Feld, Mindest-Ausfüllzeit, nur Absendungen von der eigenen Domain,
  * Begrenzung der Sendungen pro Absender und insgesamt, serverseitige Prüfung aller Felder.
@@ -19,7 +19,7 @@ ini_set('log_errors', '1');
 header_remove('X-Powered-By');
 
 const EMPFAENGER = 'kontakt@hisobjekt.de';
-const ABSENDER   = 'formular@hisobjekt.de'; // Postfach muss bei IONOS angelegt sein
+const ABSENDER   = 'kontakt@hisobjekt.de';
 
 // Begrenzung: höchstens 3 Sendungen pro Absender in 10 Minuten und 30 Sendungen insgesamt pro Stunde
 const LIMIT_PRO_ABSENDER = 3;
