@@ -111,6 +111,19 @@ function sendung_erlaubt(): bool
 }
 
 /**
+ * Technisches Protokoll (ohne Passwort und ohne Kundendaten) in his-formular.log –
+ * bevorzugt im Ordner über public_html, sonst in public_html (dort per .htaccess gesperrt).
+ */
+function protokoll(string $text): void
+{
+    $ordner = @is_writable(dirname(__DIR__)) ? dirname(__DIR__) : __DIR__;
+    $zeile = date('Y-m-d H:i:s') . '  ' . $text . "\n";
+    if (@file_put_contents($ordner . '/his-formular.log', $zeile, FILE_APPEND | LOCK_EX) === false) {
+        error_log('HIS Formular: ' . $text);
+    }
+}
+
+/**
  * Zugangsdaten für den Versand über IONOS laden. Gesucht wird zuerst außerhalb des Web-Ordners,
  * dann im Web-Ordner (dort zusätzlich per .htaccess gesperrt; die Datei gibt beim Aufruf nichts aus).
  */
@@ -122,11 +135,11 @@ function smtp_konfiguration(): ?array
             if (is_array($c) && !empty($c['server']) && !empty($c['benutzer']) && !empty($c['passwort'])) {
                 return $c + ['port' => 587, 'sicherheit' => 'tls'];
             }
-            error_log('HIS Formular: ' . $datei . ' gefunden, aber unvollständig (Server, Benutzer oder Passwort fehlt)');
+            protokoll('Zugangsdatei ' . $datei . ' gefunden, aber unvollständig (Server, Benutzer oder Passwort fehlt)');
         }
     }
     // Nachvollziehbar machen, warum nicht über IONOS versendet wird (z. B. open_basedir verhindert Zugriff)
-    error_log('HIS Formular: keine lesbare his-mail-config.php gefunden – Versand per mail(). open_basedir: '
+    protokoll('Keine lesbare his-mail-config.php gefunden – Versand per mail(). open_basedir: '
         . (ini_get('open_basedir') ?: 'nicht gesetzt'));
     return null;
 }
@@ -138,11 +151,12 @@ function smtp_senden(array $c, string $von, string $an, string $nachricht): bool
     $kontext = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'peer_name' => $c['server']]]);
     $fp = @stream_socket_client(($ssl ? 'ssl://' : 'tcp://') . $c['server'] . ':' . (int) $c['port'], $nr, $fehler, 15, STREAM_CLIENT_CONNECT, $kontext);
     if ($fp === false) {
-        error_log('HIS Formular SMTP: Verbindung fehlgeschlagen: ' . $fehler);
+        protokoll('SMTP: Verbindung zu ' . $c['server'] . ':' . (int) $c['port'] . ' fehlgeschlagen: ' . $fehler . ' (' . $nr . ')');
         return false;
     }
     stream_set_timeout($fp, 15);
-    $schritt = function (string $befehl, array $erwartet) use ($fp): void {
+    $verlauf = [];
+    $schritt = function (string $befehl, array $erwartet) use ($fp, &$verlauf): void {
         if ($befehl !== '') {
             fwrite($fp, $befehl . "\r\n");
         }
@@ -153,6 +167,9 @@ function smtp_senden(array $c, string $von, string $an, string $nachricht): bool
                 break; // letzte Zeile einer (mehrzeiligen) Antwort
             }
         }
+        // Befehl ohne Anmeldedaten mitschreiben (Benutzer/Passwort sind base64 und werden ausgeblendet)
+        $anzeige = preg_match('/^(EHLO|STARTTLS|AUTH|MAIL|RCPT|DATA|QUIT)/', $befehl) ? $befehl : ($befehl === '' ? '(Verbindung)' : '(Inhalt/Anmeldung)');
+        $verlauf[] = $anzeige . ' -> ' . str_replace(["\r", "\n"], ' ', trim($antwort));
         if (!in_array((int) substr($antwort, 0, 3), $erwartet, true)) {
             throw new RuntimeException(trim($antwort) !== '' ? trim($antwort) : 'keine Antwort');
         }
@@ -177,11 +194,13 @@ function smtp_senden(array $c, string $von, string $an, string $nachricht): bool
         $schritt(preg_replace('/^\./m', '..', $nachricht) . "\r\n.", [250]);
         $schritt('QUIT', [221]);
     } catch (RuntimeException $e) {
-        error_log('HIS Formular SMTP: ' . $e->getMessage());
+        protokoll('SMTP-Fehler: ' . $e->getMessage() . "\n    Verlauf:\n    " . implode("\n    ", $verlauf));
         fclose($fp);
         return false;
     }
     fclose($fp);
+    // vorletzte Antwort = Bestätigung des Mailservers nach dem Inhalt (enthält meist eine Vorgangsnummer)
+    protokoll('SMTP: von ' . $c['server'] . ' angenommen: ' . ($verlauf[count($verlauf) - 2] ?? ''));
     return true;
 }
 
@@ -282,9 +301,10 @@ if ($smtp !== null) {
         $kopfzeilen,
     ]) . "\r\n\r\n" . $text;
     $gesendet = smtp_senden($smtp, ABSENDER, EMPFAENGER, $nachricht);
-    error_log('HIS Formular: Versand über ' . $smtp['server'] . ($gesendet ? ' erfolgreich' : ' fehlgeschlagen'));
+    protokoll('Versand über ' . $smtp['server'] . ($gesendet ? ' erfolgreich' : ' FEHLGESCHLAGEN'));
 } else {
     $gesendet = mail(EMPFAENGER, $betreffKodiert, $text, $kopfzeilen, '-f' . ABSENDER);
+    protokoll('Versand per mail() ' . ($gesendet ? 'an den lokalen Mailserver übergeben' : 'FEHLGESCHLAGEN'));
 }
 
 zurueck($seite, $gesendet ? 'ok' : 'fehler');

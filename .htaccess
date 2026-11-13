@@ -19,8 +19,8 @@ ErrorDocument 404 /404.html
   RewriteRule ^ https://hisobjekt.de%{REQUEST_URI} [L,R=301]
 </IfModule>
 
-# Zugangsdaten für den Mailversand (und ihre Vorlage) nie ausliefern
-<FilesMatch "^his-mail-config">
+# Zugangsdaten für den Mailversand, ihre Vorlage und das Versandprotokoll nie ausliefern
+<FilesMatch "^his-(mail-config|formular)">
   Require all denied
 </FilesMatch>
 
