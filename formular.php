@@ -111,12 +111,39 @@ function sendung_erlaubt(): bool
 }
 
 /**
- * Technisches Protokoll (ohne Passwort und ohne Kundendaten) in his-formular.log –
- * bevorzugt im Ordner über public_html, sonst in public_html (dort per .htaccess gesperrt).
+ * Ordner, in denen Zugangsdatei und Protokoll gesucht bzw. angelegt werden – in dieser Reihenfolge:
+ * Home-Verzeichnis des Kontos (bei Hetzner z. B. /usr/home/<konto>, der oberste Ordner im FTP-Programm),
+ * der Ordner über dem Webordner und zuletzt der Webordner selbst (dort per .htaccess gesperrt).
+ */
+function suchordner(): array
+{
+    $ordner = [getenv('HOME') ?: ''];
+    if (function_exists('posix_getpwuid') && function_exists('posix_geteuid')) {
+        $ordner[] = posix_getpwuid(posix_geteuid())['dir'] ?? '';
+    }
+    if (function_exists('get_current_user')) {
+        $ordner[] = '/usr/home/' . get_current_user();
+    }
+    $ordner[] = dirname(__DIR__);
+    $ordner[] = __DIR__;
+    return array_values(array_unique(array_filter($ordner, function ($o) {
+        return $o !== '' && @is_dir($o);
+    })));
+}
+
+/**
+ * Technisches Protokoll (ohne Passwort und ohne Kundendaten) in his-formular.log,
+ * im ersten beschreibbaren Suchordner (siehe suchordner()).
  */
 function protokoll(string $text): void
 {
-    $ordner = @is_writable(dirname(__DIR__)) ? dirname(__DIR__) : __DIR__;
+    $ordner = __DIR__;
+    foreach (suchordner() as $o) {
+        if (@is_writable($o)) {
+            $ordner = $o;
+            break;
+        }
+    }
     $zeile = date('Y-m-d H:i:s') . '  ' . $text . "\n";
     if (@file_put_contents($ordner . '/his-formular.log', $zeile, FILE_APPEND | LOCK_EX) === false) {
         error_log('HIS Formular: ' . $text);
@@ -124,12 +151,12 @@ function protokoll(string $text): void
 }
 
 /**
- * Zugangsdaten für den Versand über IONOS laden. Gesucht wird zuerst außerhalb des Web-Ordners,
- * dann im Web-Ordner (dort zusätzlich per .htaccess gesperrt; die Datei gibt beim Aufruf nichts aus).
+ * Zugangsdaten für den Versand über IONOS laden (Suchordner siehe suchordner(); im Webordner
+ * zusätzlich per .htaccess gesperrt, die Datei gibt beim Aufruf nichts aus).
  */
 function smtp_konfiguration(): ?array
 {
-    foreach ([dirname(__DIR__) . '/his-mail-config.php', __DIR__ . '/his-mail-config.php'] as $datei) {
+    foreach (array_map(function ($o) { return $o . '/his-mail-config.php'; }, suchordner()) as $datei) {
         if (@is_file($datei) && @is_readable($datei)) {
             $c = include $datei;
             if (is_array($c) && !empty($c['server']) && !empty($c['benutzer']) && !empty($c['passwort'])) {

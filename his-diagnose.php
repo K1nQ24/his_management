@@ -14,12 +14,15 @@ $z = function (string $t) { echo $t, "\n"; flush(); };
 $z('PHP ' . PHP_VERSION . ' | SAPI ' . PHP_SAPI . ' | Benutzer ' . (function_exists('get_current_user') ? get_current_user() : '?'));
 $z('Webordner: ' . __DIR__ . ' | darüber: ' . dirname(__DIR__));
 $z('open_basedir: ' . (ini_get('open_basedir') ?: 'nicht gesetzt') . ' | disable_functions: ' . (ini_get('disable_functions') ?: '-'));
+$home = [getenv('HOME') ?: '-', (function_exists('posix_getpwuid') ? (posix_getpwuid(posix_geteuid())['dir'] ?? '-') : 'posix fehlt'), '/usr/home/' . get_current_user()];
+$z('Home-Kandidaten: ' . implode(' | ', array_map(function ($h) { return $h . (@is_dir($h) ? ' (vorhanden' . (@is_writable($h) ? ', beschreibbar)' : ', nicht beschreibbar)') : ' (fehlt)'); }, $home)));
 $z('formular.php md5: ' . (@is_file(__DIR__ . '/formular.php') ? md5_file(__DIR__ . '/formular.php') : 'FEHLT'));
 $z('Schreibrecht darüber: ' . (@is_writable(dirname(__DIR__)) ? 'ja' : 'nein') . ' | im Webordner: ' . (@is_writable(__DIR__) ? 'ja' : 'nein'));
-foreach ([dirname(__DIR__) . '/his-formular.log', __DIR__ . '/his-formular.log'] as $l) { $z('Protokoll ' . $l . ': ' . (@is_file($l) ? filesize($l) . ' Byte' : 'nicht vorhanden')); }
+$orte = array_values(array_unique(array_filter(array_merge($home, [dirname(__DIR__), __DIR__]), function ($o) { return $o !== '-' && @is_dir($o); })));
+foreach (array_map(function ($o) { return $o . '/his-formular.log'; }, $orte) as $l) { $z('Protokoll ' . $l . ': ' . (@is_file($l) ? filesize($l) . ' Byte' : 'nicht vorhanden')); }
 
 $cfg = null;
-foreach ([dirname(__DIR__) . '/his-mail-config.php', __DIR__ . '/his-mail-config.php'] as $d) {
+foreach (array_map(function ($o) { return $o . '/his-mail-config.php'; }, $orte) as $d) {
     $da = @is_file($d); $les = $da && @is_readable($d);
     $z('Zugangsdatei ' . $d . ': ' . ($da ? 'vorhanden' : 'fehlt') . ($da ? ($les ? ', lesbar' : ', NICHT lesbar') : ''));
     if ($les && $cfg === null) {
