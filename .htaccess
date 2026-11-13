@@ -20,7 +20,7 @@ ErrorDocument 404 /404.html
 </IfModule>
 
 # Zugangsdaten für den Mailversand, ihre Vorlage und das Versandprotokoll nie ausliefern
-<FilesMatch "^his-(mail-config|formular)">
+<FilesMatch "^his-(mail-config|mail-vorlagen|formular)">
   Require all denied
 </FilesMatch>
 

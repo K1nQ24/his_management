@@ -283,55 +283,60 @@ if (!sendung_erlaubt()) {
     zurueck($seite, 'limit');
 }
 
-$zeilen = [
-    $typ === 'kontakt' ? 'Neue Kontaktanfrage über die Website' : 'Neue Anfrage über die Website',
-    str_repeat('-', 44),
-    'Name:            ' . $name,
-    'E-Mail:          ' . $email,
-    'Telefon:         ' . ($telefon !== '' ? $telefon : '–'),
+require __DIR__ . '/his-mail-vorlagen.php';
+
+$daten = [
+    'typ'        => $typ,
+    'name'       => $name,
+    'email'      => $email,
+    'telefon'    => $telefon,
+    'ort'        => $ort,
+    'zeitraum'   => $zeitraum,
+    'nachricht'  => $nachricht,
+    'leistungen' => $gewaehlt,
+    'zeit'       => date('d.m.Y, H:i') . ' Uhr',
 ];
-if ($typ === 'anfrage') {
-    $zeilen[] = 'Objektort / PLZ: ' . $ort;
-    $zeilen[] = 'Leistung(en):    ' . implode(', ', $gewaehlt);
-    $zeilen[] = 'Zeitraum:        ' . ($zeitraum !== '' ? $zeitraum : '–');
-}
-$zeilen[] = '';
-$zeilen[] = 'Nachricht:';
-$zeilen[] = $nachricht !== '' ? $nachricht : '–';
-$zeilen[] = '';
-$zeilen[] = str_repeat('-', 44);
-$zeilen[] = 'Datenschutzhinweis bestätigt: ja';
-
-$betreff = ($typ === 'kontakt' ? 'Kontaktanfrage' : 'Anfrage') . ' von ' . $name
-    . ($gewaehlt !== [] ? ' – ' . implode(', ', $gewaehlt) : '');
-
-// $email ist durch FILTER_VALIDATE_EMAIL geprüft und enthält keine Zeilenumbrüche.
-// Quoted-Printable bricht lange Zeilen normgerecht um (max. 76 Zeichen), Umlaute bleiben erhalten.
-$kopfzeilen = implode("\r\n", [
-    'From: HIS Objektmanagement Website <' . ABSENDER . '>',
-    'Reply-To: ' . $email,
-    'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: quoted-printable',
-]);
-
-$betreffKodiert = mb_encode_mimeheader(mb_substr($betreff, 0, 150), 'UTF-8', 'Q');
-$text = quoted_printable_encode(str_replace("\n", "\r\n", implode("\n", $zeilen)));
+$logo = __DIR__ . '/assets/mail/logo-weiss.png';
 $smtp = smtp_konfiguration();
 
-if ($smtp !== null) {
-    $nachricht = implode("\r\n", [
-        'Date: ' . date(DATE_RFC2822),
-        'Message-ID: <' . bin2hex(random_bytes(12)) . '@hisobjekt.de>',
-        'To: <' . EMPFAENGER . '>',
-        'Subject: ' . $betreffKodiert,
-        $kopfzeilen,
-    ]) . "\r\n\r\n" . $text;
-    $gesendet = smtp_senden($smtp, ABSENDER, EMPFAENGER, $nachricht);
-    protokoll('Versand über ' . $smtp['server'] . ($gesendet ? ' erfolgreich' : ' FEHLGESCHLAGEN'));
-} else {
-    $gesendet = mail(EMPFAENGER, $betreffKodiert, $text, $kopfzeilen, '-f' . ABSENDER);
-    protokoll('Versand per mail() ' . ($gesendet ? 'an den lokalen Mailserver übergeben' : 'FEHLGESCHLAGEN'));
+/**
+ * Eine Mail verschicken – über IONOS (SMTP), falls Zugangsdaten vorhanden, sonst per mail().
+ * $an und $antwortAn sind geprüfte Adressen ohne Zeilenumbrüche.
+ */
+$versende = function (string $an, string $absenderName, string $antwortAn, string $betreff, string $text, string $html, array $zusatz = [])
+    use ($smtp, $logo): bool {
+    [$typZeile, $inhalt] = mail_mime($text, $html, $logo);
+    $kopf = array_merge([
+        'From: ' . mb_encode_mimeheader($absenderName, 'UTF-8', 'Q') . ' <' . ABSENDER . '>',
+        'Reply-To: ' . $antwortAn,
+        'MIME-Version: 1.0',
+        $typZeile,
+    ], $zusatz);
+    $betreffKodiert = mb_encode_mimeheader(mb_substr($betreff, 0, 150), 'UTF-8', 'Q');
+    if ($smtp !== null) {
+        $nachricht = implode("\r\n", array_merge([
+            'Date: ' . date(DATE_RFC2822),
+            'Message-ID: <' . bin2hex(random_bytes(12)) . '@hisobjekt.de>',
+            'To: <' . $an . '>',
+            'Subject: ' . $betreffKodiert,
+        ], $kopf)) . "\r\n\r\n" . $inhalt;
+        return smtp_senden($smtp, ABSENDER, $an, $nachricht);
+    }
+    return mail($an, $betreffKodiert, $inhalt, implode("\r\n", $kopf), '-f' . ABSENDER);
+};
+$weg = $smtp !== null ? 'über ' . $smtp['server'] : 'per mail()';
+
+// 1. Benachrichtigung an HIS Objektmanagement (Antworten gehen an die anfragende Person)
+[$betreff, $text, $html] = mail_benachrichtigung($daten);
+$gesendet = $versende(EMPFAENGER, 'HIS Objektmanagement Website', $email, $betreff, $text, $html);
+protokoll('Benachrichtigung ' . $weg . ($gesendet ? ' erfolgreich' : ' FEHLGESCHLAGEN'));
+
+// 2. Eingangsbestätigung an die anfragende Person – nur, wenn die Benachrichtigung angekommen ist.
+//    Scheitert nur die Bestätigung, gilt die Anfrage trotzdem als eingegangen.
+if ($gesendet) {
+    [$betreff, $text, $html] = mail_bestaetigung($daten);
+    $bestaetigt = $versende($email, 'HIS Objektmanagement', EMPFAENGER, $betreff, $text, $html, ['Auto-Submitted: auto-replied']);
+    protokoll('Eingangsbestätigung ' . $weg . ($bestaetigt ? ' erfolgreich' : ' FEHLGESCHLAGEN'));
 }
 
 zurueck($seite, $gesendet ? 'ok' : 'fehler');
