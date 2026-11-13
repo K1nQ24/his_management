@@ -683,3 +683,16 @@ a.c-card:hover small { color: var(--grey-400); }
 .js .nav-city.illu-anim.in .illu [class*="f"] { transition: fill-opacity .3s ease calc(var(--dl, 0s) + .2s); }
 /* Silhouette im Footer: statisch, ohne Funkeln */
 .footer-city .illu .tw { animation: none; }
+
+/* ---------- Rechtstexte auf dem Handy: nichts darf die Seite verbreitern ---------- */
+.legal-layout { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) { .legal-layout { grid-template-columns: 240px minmax(0, 1fr); } }
+.legal-layout > * { min-width: 0; }
+.legal { overflow-wrap: anywhere; } /* lange Links (z. B. Datenschutzhinweise der Plattformen) umbrechen */
+/* Cookie-Liste von Cookiebot: breite Tabellen innerhalb des Kastens seitlich scrollbar statt die Seite zu verbreitern */
+.cookie-erklaerung { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.cookie-erklaerung table { min-width: 0; font-size: .85rem; border-collapse: collapse; }
+.cookie-erklaerung th, .cookie-erklaerung td { padding: .4rem .6rem; border-bottom: 1px solid var(--grey-200); text-align: left; vertical-align: top; }
+/* Lange deutsche Wörter in Überschriften (z. B. „Immobilienvorbereitung“) auf schmalen Handys trennen statt überlaufen */
+h1, h2, h3 { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+.service-top > * { min-width: 0; }
